@@ -1,0 +1,147 @@
+import datetime
+import os
+import sys
+
+import cv2
+import webbrowser
+from requests import get
+import wikipedia
+import pywhatkit as kit
+import pyttsx3
+import keyboard
+import speech_recognition as sr
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+engine.setProperty(voices,voices[0].id)
+engine.setProperty('rate',255)
+
+
+def speak(audio):
+    engine.say(audio)
+    print(audio)
+    engine.runAndWait()
+
+def takecommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("listening")
+        r.pause_threshold = 5
+        audio = r.listen(source,timeout=5,phrase_time_limit=3)
+
+
+    try:
+        print("recognizing")
+        query = r.recognize_google(audio,language='en-in')
+        print(f"user said  :---> {query}")
+
+    except Exception as e:
+        speak("say that again plzz")
+        return "none"
+    return query
+
+
+
+def time():
+    speak(" the current time is ")
+    hour = (datetime.datetime.now().strftime("%I:%M:%S"))
+    speak(hour)
+
+
+def date():
+    speak("the current date is")
+    date = datetime.date.today()
+    speak(date)
+
+def wish():
+    hour = (datetime.datetime.now().hour)
+    if hour>6 and hour<12:
+        speak("good morning sir")
+    elif hour >12 and hour<6:
+        speak("good afternoon sir")
+    elif hour>6:
+        speak("good evening sir")
+    time()
+    date()
+    speak("personal AI assistant at your service how may i help u sir")
+
+
+
+if __name__=="__main__":
+    wish()
+
+
+while True:
+
+    query = takecommand().lower()
+
+    if "open notepad" in query:
+        path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Notepad.lnk"
+        os.startfile(path)
+
+    elif "open cmd" in query:
+        os.system("start cmd")
+
+    elif "open google" in query:
+        speak("opening google")
+        webbrowser.open("chrome")
+        speak("what should i search  on google")
+        a  = str(takecommand().lower())
+        webbrowser.open(f"https://www.google.com/search?q={a}&rlz=1C1CHBF_enIN998IN998&oq=tar&aqs=chrome..69i57.73738j0j7&sourceid=chrome&ie=UTF-8")
+
+
+
+    elif "open youtube" in query:
+        speak("opening youtube")
+        webbrowser.open("https://www.youtube.com/")
+        speak("what u want to search on youtube")
+        a  = takecommand().lower()
+        kit.playonyt(a)
+
+
+    elif "open camera" in query:
+        cap = cv2.VideoCapture(0)
+        while True:
+            ret, img = cap.read()
+            cv2.imshow('webcam', img)
+            k = cv2.waitKey(50)
+            if k == 27:
+                break;
+        cap.realease()
+        cv2.destroyWindow()
+
+
+
+    elif "ip address" in query:
+        ip = get('http://api.ipify.org').text
+        speak(f"your ip address is {ip}")
+
+
+    elif "wikipedia" in query:
+        speak("searching wikipedia.....")
+        query = query.replace("wikipedia", " ")
+        result = wikipedia.summary(query, sentences=2)
+        speak("according to wikipedia")
+        speak(result)
+        print(result)
+
+
+
+    elif "open explorer" in query:
+        speak("opening window exploror")
+        keyboard.press_and_release("Win+E")
+
+
+    elif "open unity" in query:        # to use this you should have unity
+        speak("opening unity")
+        path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Unity 2019.4.29f1 (64-bit)"
+        os.startfile(path)
+
+
+    elif "no thanks" in query:
+        speak("terminating services , thanks for using personal AI")
+        sys.exit()
+
+
+
+
